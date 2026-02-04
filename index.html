@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title id="pageTitle">【悲報】パヨクさん 高市の痛みを知らない非国民だったw</title>
+<title>【悲報】パヨクさん 高市の痛みを知らない非国民だったw</title>
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-MEGBV1X5V0"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -35,36 +35,37 @@
     background: white;
     z-index: 1;
   }
-  /* 左上の画像（縦横1/5離した位置） */
-  .top-left-image {
-    position: absolute;
-    top: 20%;
-    left: 20%;
-    max-width: 390px;
-    width: 40%;
-    cursor: pointer;
-    display: none;
-  }
-  /* 真ん中下の画像 */
-  .bottom-center-image {
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    max-width: 390px;
-    width: 40%;
-    cursor: pointer;
-    display: none;
-  }
-  /* 灰色の横線（真ん中の下よりちょっと上） */
-  .gray-line {
-    position: absolute;
-    bottom: 15%;
-    left: 0;
-    width: 100%;
-    height: 1px;
-    background-color: gray;
-  }
+  /* 左上の画像（縦横9%離した位置、横幅60%） */
+.top-left-image {
+  position: absolute;
+  top: 9%;
+  left: 9%;
+  width: 60%;
+  cursor: pointer;
+  display: none;
+}
+
+/* 真ん中下の画像（縦幅9%） */
+.bottom-center-image {
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 9vh;
+  width: auto;
+  cursor: pointer;
+  display: none;
+}
+
+/* 灰色の横線（下から10%の位置） */
+.gray-line {
+  position: absolute;
+  bottom: 10%;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background-color: gray;
+}
 </style>
 </head>
 <body>
@@ -79,33 +80,6 @@ const overlay = document.getElementById("overlay");
 const video = document.getElementById("video");
 const topLeftImage = document.getElementById("topLeftImage");
 const bottomCenterImage = document.getElementById("bottomCenterImage");
-
-// URLからタイトルを取得して設定
-function setTitleFromURL() {
-  // セッションストレージからリダイレクトされたパスを取得
-  let path = sessionStorage.getItem('redirectPath');
-  
-  if (path) {
-    // 使用後は削除
-    sessionStorage.removeItem('redirectPath');
-    sessionStorage.removeItem('redirectSearch');
-  } else {
-    // 通常のアクセスの場合は現在のパスを使用
-    path = window.location.pathname;
-  }
-  
-  // パスから最後の部分（タイトル）を取得
-  // 形式: /test/read.cgi/livejupiter/(数字)/(タイトル)
-  const match = path.match(/\/test\/read\.cgi\/livejupiter\/(\d+)\/(.+)$/);
-  if (match && match[2]) {
-    // URLエンコードされている場合はデコード
-    const title = decodeURIComponent(match[2]);
-    document.getElementById('pageTitle').textContent = title;
-  }
-}
-
-// ページ読み込み時にタイトルを設定
-setTitleFromURL();
 
 // Cookie操作用の関数
 function setCookie(name, value, days) {
@@ -244,3 +218,4 @@ window.addEventListener("beforeunload", function (event) {
 </script>
 </body>
 </html>
+
