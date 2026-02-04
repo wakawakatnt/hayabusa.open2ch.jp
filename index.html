@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title id="pageTitle">ロボット認証</title>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-MEGBV1X5V0"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-MEGBV1X5V0');
+</script>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    background: black;
+  }
+  video {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+    background: black;
+  }
+  .overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: white;
+    z-index: 1;
+  }
+  /* 左上の画像（縦横1/5離した位置） */
+  .top-left-image {
+    position: absolute;
+    top: 20%;
+    left: 20%;
+    max-width: 390px;
+    width: 40%;
+    cursor: pointer;
+    display: none;
+  }
+  /* 真ん中下の画像 */
+  .bottom-center-image {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: 390px;
+    width: 40%;
+    cursor: pointer;
+    display: none;
+  }
+  /* 灰色の横線（真ん中の下よりちょっと上） */
+  .gray-line {
+    position: absolute;
+    bottom: 15%;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background-color: gray;
+  }
+</style>
+</head>
+<body>
+<video id="video" src="114514.mp4" loop preload="auto"></video>
+<div class="overlay" id="overlay">
+  <img src="364364.jpg" alt="Start" class="top-left-image" id="topLeftImage">
+  <img src="114514.jpg" alt="Start" class="bottom-center-image" id="bottomCenterImage">
+  <div class="gray-line"></div>
+</div>
+<script>
+const overlay = document.getElementById("overlay");
+const video = document.getElementById("video");
+const topLeftImage = document.getElementById("topLeftImage");
+const bottomCenterImage = document.getElementById("bottomCenterImage");
+
+// URLからタイトルを取得して設定
+function setTitleFromURL() {
+  // セッションストレージからリダイレクトされたパスを取得
+  let path = sessionStorage.getItem('redirectPath');
+  
+  if (path) {
+    // 使用後は削除
+    sessionStorage.removeItem('redirectPath');
+    sessionStorage.removeItem('redirectSearch');
+  } else {
+    // 通常のアクセスの場合は現在のパスを使用
+    path = window.location.pathname;
+  }
+  
+  // パスから最後の部分（タイトル）を取得
+  // 形式: /test/read.cgi/livejupiter/(数字)/(タイトル)
+  const match = path.match(/\/test\/read\.cgi\/livejupiter\/(\d+)\/(.+)$/);
+  if (match && match[2]) {
+    // URLエンコードされている場合はデコード
+    const title = decodeURIComponent(match[2]);
+    document.getElementById('pageTitle').textContent = title;
+  }
+}
+
+// ページ読み込み時にタイトルを設定
+setTitleFromURL();
+
+// Cookie操作用の関数
+function setCookie(name, value, days) {
+  const d = new Date();
+  d.setTime(d.getTime() + (days * 24 * 60 * 60 * 1000));
+  document.cookie = `${name}=${value};expires=${d.toUTCString()};path=/`;
+}
+
+function getCookie(name) {
+  const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+  return match ? match[2] : null;
+}
+
+// リファラー情報を取得（最初に定義）
+const referrer = document.referrer || 'direct';
+const referrerDomain = referrer !== 'direct' ? new URL(referrer).hostname : 'direct';
+
+// 訪問回数を取得・更新
+let visitCount = parseInt(getCookie('visit_count') || '0');
+visitCount++;
+setCookie('visit_count', visitCount, 365);
+
+// 過去の動画再生履歴を取得
+const hasPlayedBefore = getCookie('has_played_video') === 'true';
+
+// Google Analyticsにユーザープロパティとして送信
+gtag('set', 'user_properties', {
+  visit_count: visitCount,
+  has_played_before: hasPlayedBefore,
+  referrer_domain: referrerDomain
+});
+
+// ページビュー時のイベント送信
+gtag('event', 'page_view_with_visit_count', {
+  visit_count: visitCount,
+  has_played_before: hasPlayedBefore,
+  referrer: referrer,
+  referrer_domain: referrerDomain
+});
+
+// 動画再生開始時刻を記録
+let videoStartTime = null;
+let videoPlayed = false;
+
+// 滞在時間を定期的に送信
+let stayInterval = null;
+
+setTimeout(() => {
+  topLeftImage.style.display = "block";
+  bottomCenterImage.style.display = "block";
+}, 500);
+
+async function startVideo() {
+  try {
+    overlay.style.display = "none";
+    video.volume = 1.0;
+    
+    // 動画再生開始
+    videoStartTime = Date.now();
+    videoPlayed = true;
+    
+    // 動画再生イベントを送信（リファラー情報含む）
+    gtag('event', 'video_play_started', {
+      visit_count: visitCount,
+      has_played_before: hasPlayedBefore,
+      referrer: referrer,
+      referrer_domain: referrerDomain
+    });
+    
+    // 動画再生履歴をCookieに保存
+    setCookie('has_played_video', 'true', 365);
+    
+    await video.play();
+    
+    // フルスクリーン化
+    const elem = document.documentElement;
+    if (elem.requestFullscreen) await elem.requestFullscreen();
+    else if (elem.mozRequestFullScreen) await elem.mozRequestFullScreen();
+    else if (elem.webkitRequestFullscreen) await elem.webkitRequestFullscreen();
+    else if (elem.msRequestFullscreen) await elem.msRequestFullscreen();
+    
+    // 1秒ごとに滞在時間を記録（送信は5秒ごと）
+    let lastSentTime = 0;
+    stayInterval = setInterval(() => {
+      if (videoStartTime) {
+        const stayDuration = ((Date.now() - videoStartTime) / 1000).toFixed(1);
+        // 5秒ごとにGoogle Analyticsに送信
+        if (parseFloat(stayDuration) - lastSentTime >= 5) {
+          gtag('event', 'video_watch_duration', {
+            duration_seconds: parseFloat(stayDuration),
+            visit_count: visitCount,
+            referrer_domain: referrerDomain
+          });
+          lastSentTime = parseFloat(stayDuration);
+        }
+      }
+    }, 1000);
+    
+  } catch (err) {
+    console.error("エラー:", err);
+  }
+}
+
+overlay.addEventListener("click", startVideo);
+
+window.addEventListener("resize", () => {
+  video.style.height = `${window.innerHeight}px`;
+});
+
+// ページ離脱時に最終的な滞在時間を送信
+window.addEventListener("beforeunload", function (event) {
+  if (videoStartTime) {
+    const finalDuration = ((Date.now() - videoStartTime) / 1000).toFixed(1);
+    gtag('event', 'video_watch_complete', {
+      duration_seconds: parseFloat(finalDuration),
+      visit_count: visitCount,
+      referrer_domain: referrerDomain
+    });
+  }
+  
+  gtag('event', 'session_summary', {
+    video_played: videoPlayed,
+    visit_count: visitCount,
+    has_played_before: hasPlayedBefore,
+    referrer: referrer,
+    referrer_domain: referrerDomain
+  });
+  
+  if (stayInterval) {
+    clearInterval(stayInterval);
+  }
+  
+  event.preventDefault();
+  event.returnValue = "";
+});
+</script>
+</body>
+</html>
